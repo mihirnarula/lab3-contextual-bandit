@@ -1,74 +1,166 @@
-# Student Submission Checklist (Lab 3)
+# Lab 3: Contextual Bandit-Based News Recommendation System
 
-Before submitting your Lab 3 assignment, ensure that **all items below are completed**. Submissions that do not follow this checklist may receive partial or no credit.
-
----
-
-## 🔹 Repository and Branching
-
-* [ ] The repository is correctly created on GitHub.
-* [ ] All work is committed to **exactly one branch** named
-  `firstname_U20230xxx`.
-* [ ] **No work is pushed to `master`**.
-* [ ] The correct branch is pushed to GitHub.
+**Name:** Mihir Narula  
+**Roll Number:** U20230029  
 
 ---
 
-## 🔹 Notebook Submission
+## 📌 Overview
 
-* [ ] Exactly **one** Jupyter Notebook (`.ipynb`) is submitted.
-* [ ] The notebook is placed at the **root of the repository**.
-* [ ] The notebook is named **exactly**:
-  `lab3_results_<roll_number>.ipynb`.
-* [ ] The notebook runs **top to bottom without errors**.
-* [ ] All outputs (plots, tables, metrics) are visible in the notebook.
+This project implements a **Contextual Multi-Armed Bandit (CMAB)** system for personalized news recommendation.
 
----
+- **User categories (User1, User2, User3)** are treated as contexts.
+- **News categories (Entertainment, Education, Tech, Crime)** are treated as bandit arms.
+- Rewards are generated using the provided `rlcmab-sampler` package.
 
-## 🔹 Sampler Usage
-
-* [ ] The provided `sampler` package is used **without modification**.
-* [ ] The sampler is initialized using your correct roll number `i`.
-* [ ] Rewards are obtained **only** via `sampler.sample(j)`.
-* [ ] No hard-coded or synthetic rewards are used.
+The system integrates:
+- Supervised Learning (User Classification)
+- Reinforcement Learning (Contextual Bandits)
 
 ---
 
-## 🔹 Contextual Bandit Implementation
+## 🧹 Data Preprocessing
 
-* [ ] User category is treated as the **context**.
-* [ ] News category is treated as the **bandit arm**.
-* [ ] The arm index mapping follows the specification in the lab handout.
-* [ ] All three algorithms are implemented:
-
-  * Epsilon-Greedy
-  * Upper Confidence Bound (UCB)
-  * SoftMax
-
----
-
-## 🔹 Evaluation and Plots
-
-* [ ] Classification accuracy is reported on `test_users.csv`.
-* [ ] Reinforcement learning simulation is run for **T = 10,000 steps**.
-* [ ] Plots include:
-
-  * Average Reward vs. Time (per context)
-  * Hyperparameter comparison plots
-* [ ] All plots have labeled axes, legends, and titles.
+- Loaded:
+  - `news_articles.csv`
+  - `train_users.csv`
+  - `test_users.csv`
+- Removed rows with missing critical fields (headline/category).
+- Standardized news categories to:
+  - Entertainment
+  - Education
+  - Tech
+  - Crime
+- Filled missing age values using median imputation.
+- Encoded user labels for classification.
 
 ---
 
-## 🔹 README.md Requirements
+## 🧠 User Classification (Context Detection)
 
-* [ ] README.md is present at the repository root.
-* [ ] It explains the overall approach and design decisions.
-* [ ] It summarizes key results and observations.
-* [ ] It includes clear instructions to reproduce the experiments.
-* [ ] All external references (if any) are properly cited.
+A Logistic Regression classifier was trained using:
+
+- age  
+- income  
+- clicks  
+- purchase_amount  
+
+The model was:
+- Trained on `train_users.csv`
+- Evaluated on `test_users.csv`
+- Test accuracy is printed in the notebook output.
+
+This classifier determines the user context before applying the bandit policy.
 
 ---
 
-## Important Note
+## 🎰 Contextual Bandit Algorithms Implemented
 
-> Submissions that do not follow the specified branch name, notebook naming convention, or sampler usage rules may not be evaluated.
+Three contextual bandit strategies were implemented separately for each user context:
+
+### 1️⃣ Epsilon-Greedy
+Tested with:
+- ε = 0.01
+- ε = 0.1
+- ε = 0.2
+
+### 2️⃣ Upper Confidence Bound (UCB)
+Tested with:
+- C = 0.5
+- C = 1
+- C = 2
+
+### 3️⃣ Softmax
+- Temperature parameter τ = 1
+
+---
+
+## 🎯 Arm Mapping
+
+The 12-arm structure follows the lab specification:
+
+- Arms 0–3 → User1  
+- Arms 4–7 → User2  
+- Arms 8–11 → User3  
+
+Implemented using:
+
+```python
+base = context_id * 4
+reward_sampler.sample(base + arm)
+```
+
+All rewards are obtained strictly using:
+
+```python
+reward_sampler.sample(j)
+```
+
+No synthetic or hard-coded rewards are used.
+
+---
+
+## 📊 Reinforcement Learning Simulation
+
+- Simulation length: **T = 10,000**
+- Generated plots:
+  - Average Reward vs Time (per context)
+  - Hyperparameter comparison plots
+- All plots include:
+  - Title
+  - X-axis label
+  - Y-axis label
+  - Legend
+
+Expected reward distributions (Q-values) are printed for each context.
+
+---
+
+## 🤖 Recommendation Engine
+
+The system performs:
+
+1. Classify user → determine context  
+2. Select optimal news category using trained bandit policy  
+3. Randomly sample an article from that category  
+4. Return article headline and category  
+
+---
+
+## ⚙️ How to Run
+
+1. Install Python 3.12  
+2. Install required package:
+   ```
+   pip install rlcmab-sampler==1.0.1
+   ```
+3. Ensure the `data/` folder is present in the repository root  
+4. Open:
+   ```
+   lab3_results_U20230029.ipynb
+   ```
+5. Select Python 3.12 kernel  
+6. Run all cells (Restart & Run All)
+
+---
+
+## 📈 Key Observations
+
+- Context-aware bandits improve personalization.
+- UCB provides stable convergence.
+- ε = 0.1 offers a good exploration–exploitation balance.
+- Hyperparameter tuning significantly affects performance.
+
+---
+
+## ✅ Checklist Compliance
+
+- Correct branch used  
+- Single notebook submission  
+- Correct notebook naming  
+- Sampler initialized with correct roll number (29)  
+- Rewards obtained only via sampler  
+- All three algorithms implemented  
+- T = 10,000 simulation completed  
+- Required plots included and labeled  
+- No synthetic reward generation  
